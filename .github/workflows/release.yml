@@ -1,0 +1,93 @@
+name: Release
+
+on:
+  # push:
+  # branches:
+  # - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run release-please
+        id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          config-file: .release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      - name: Checkout repository
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.tool-versions'
+          cache: npm
+
+      - name: Install dependencies
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        run: npm ci
+
+      - name: Build extension bundle
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        run: npm run build
+
+      - name: Resolve package version
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        id: pkg
+        run: |
+          set -euo pipefail
+          version="$(node -p "require('./package.json').version")"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
+      - name: Create signed CRX artifact
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        env:
+          ARTIFACT_VERSION: ${{ steps.pkg.outputs.version }}
+          CRX_SIGNING_KEY_B64: ${{ secrets.CRX_SIGNING_KEY_B64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CRX_SIGNING_KEY_B64:-}" ]; then
+            echo "CRX_SIGNING_KEY_B64 secret is not configured" >&2
+            exit 1
+          fi
+          mkdir -p release
+          key_file="$(mktemp)"
+          trap 'rm -f "$key_file"' EXIT
+          echo "$CRX_SIGNING_KEY_B64" | base64 --decode > "$key_file"
+          npx crx3 dist -p "$key_file" -o "release/signed-proofos-${ARTIFACT_VERSION}.crx"
+
+      - name: Generate artifact hash
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        env:
+          ARTIFACT_VERSION: ${{ steps.pkg.outputs.version }}
+        run: |
+          set -euo pipefail
+          artifact="release/crx-proofos-${ARTIFACT_VERSION}.zip"
+          if [ ! -f "$artifact" ]; then
+            echo "Artifact $artifact not found" >&2
+            exit 1
+          fi
+          sha256sum "$artifact" | tee "${artifact}.sha256"
+
+      - name: Upload release assets
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload \
+            "${{ steps.release.outputs.tag_name }}" \
+            "./release/crx-proofos-${{ steps.pkg.outputs.version }}.zip" \
+            "./release/crx-proofos-${{ steps.pkg.outputs.version }}.zip.sha256" \
+            "./release/signed-proofos-${{ steps.pkg.outputs.version }}.crx" \
+            --clobber

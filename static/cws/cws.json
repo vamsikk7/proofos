@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "sidePanel": "ProofOS uses the sidePanel permission to provide the Issues / Rules / Settings workbench where users review LLM proofreading findings and copy fixes.",
+    "tabs": "The tabs permission is required to open the side panel on the active Google Docs tab and update the badge with the issue count.",
+    "storage": "ProofOS uses the storage permission to persist user settings (LLM provider, model, API key, base URL) and the enabled/custom rule set in chrome.storage.sync.",
+    "contextMenus": "The contextMenus permission is used to add a 'Proofread with ProofOS' entry to the browser's context menu inside supported documents.",
+    "clipboardWrite": "Clipboard write is used by the Google Docs adapter to copy a suggested fix to the clipboard so the user can paste it into their document.",
+    "hostPermissions": "ProofOS only injects content scripts on docs.google.com. The service worker holds additional permissions for the configured LLM endpoint (default http://localhost:11434 for local Ollama, or any OpenAI-compatible URL the user adds)."
+  },
+  "singlePurpose": {
+    "description": "ProofOS is an LLM-powered proofreading workbench for Google Docs. The user picks a model (local Ollama by default, OpenAI-compatible optional), the extension reads the active document via the Docs export endpoint, surfaces issues in the side panel, and copies each suggested fix to the clipboard for the user to paste back into the document."
+  },
+  "storeListing": {
+    "description": "ProofOS — AI Proofreader for Google Docs\n\nProofOS adds an LLM-powered proofreading workbench to Google Docs. It reads the live document, asks your configured language model to find issues against an editable rule set, and copies each suggested fix to your clipboard so you can paste it back into the doc.\n\nKEY FEATURES:\n\n🧠 Bring your own LLM\n• Default: local Ollama running deepseek-r1:8b — your document stays on your machine\n• Optional: any OpenAI-compatible API (OpenAI, OpenRouter, LM Studio, vLLM, your own gateway)\n• Switch providers and models from the Settings tab\n\n📝 Works inside Google Docs\n• Reads via the Docs export endpoint — no add-in install, no OAuth\n• Long documents are chunked automatically on paragraph boundaries\n• Click 'Copy fix' to put the suggestion on your clipboard, paste where you want it\n\n⚙️ Editable rule set\n• Built-in rules cover spelling, grammar, punctuation, capitalization, prepositions, missing words, plus writing-quality (clarity, conciseness, passive voice, sentence length, parallelism)\n• Toggle rules on/off or add your own in plain English from the Rules tab\n\n🔒 Zero telemetry\n• ProofOS has no servers and collects nothing\n• Document text only goes to the LLM endpoint you configure\n• The extension only runs on docs.google.com\n\nNote: For the default local LLM path, install Ollama and run `ollama pull deepseek-r1:8b`. To use a hosted model, paste a base URL and API key into the Settings tab."
+  }
+}

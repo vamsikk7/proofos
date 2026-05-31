@@ -1,0 +1,16 @@
+services:
+  languagetool:
+    image: erikvl87/languagetool:latest
+    container_name: proofos-languagetool
+    ports:
+      - '8010:8010'
+    environment:
+      - Java_Xms=256m
+      - Java_Xmx=1g
+      - download_ngrams_for_langs=en
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q -O- http://localhost:8010/v2/languages > /dev/null || exit 1']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped

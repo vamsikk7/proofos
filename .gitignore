@@ -1,0 +1,42 @@
+# Logs
+logs
+*.log
+logs.txt
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+ref
+docs
+dist
+dev
+release
+dist-ssr
+*.local
+*.crx
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# AI assistance
+.mcp.json
+.claude
+.codex
+.cursor
+
+# misc
+AGENTS.md
+ABOUT.md
+CHANGELOG.md
+PRIVACY.md
